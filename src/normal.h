@@ -3,7 +3,10 @@
 #include <cassert>
 #include <cmath>
 #include <cstdint>
+#include <ios>
+#include <istream>
 #include <limits>
+#include <ostream>
 #include <type_traits>
 
 #include "uniform.h"
@@ -45,10 +48,31 @@ class NormalDistribution  {
   }
 
   friend bool operator==(const NormalDistribution& lhs, const NormalDistribution& rhs) {
-    return lhs.mean_ == rhs.mean_ && lhs.stddev_ == rhs.stddev_;
+    return lhs.mean() == rhs.mean() && lhs.stddev() == rhs.stddev();
   }
 
-  // TODO operator<</>>
+  friend std::ostream& operator<<(std::ostream& os, const NormalDistribution& dist) {
+    const auto flags = os.flags(std::ios_base::scientific | std::ios_base::left);
+    const auto space = os.widen(' ');
+    const auto fill = os.fill(space);
+    const auto precision = os.precision(std::numeric_limits<result_type>::max_digits10);
+
+    os << dist.mean() << space << dist.stddev();
+
+    os.flags(flags);
+    os.fill(fill);
+    os.precision(precision);
+    return os;
+  }
+
+  friend std::istream& operator>>(std::istream& is, NormalDistribution& dist) {
+    const auto flags = is.flags(std::ios_base::dec | std::ios_base::skipws);
+
+    is >> dist.mean_ >> dist.stddev_;
+
+    is.flags(flags);
+    return is;
+  }
  private:
   template <typename URNG>
   static double ziggurat(URNG& urng);
@@ -131,7 +155,7 @@ class NormalDistribution  {
       1.2601323e-09, 1.2857697e-09, 1.3146202e-09, 1.347784e-09,  1.3870636e-09,
       1.4357403e-09, 1.5008659e-09, 1.6030948e-09 };
 
-  const result_type mean_, stddev_;
+  result_type mean_, stddev_;
 };
 
 template <typename RealType>

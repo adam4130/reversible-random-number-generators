@@ -2,7 +2,10 @@
 
 #include <cassert>
 #include <cstdint>
+#include <ios>
+#include <istream>
 #include <limits>
+#include <ostream>
 #include <stdexcept>
 #include <type_traits>
 
@@ -91,12 +94,31 @@ class UniformIntDistribution {
   result_type operator()(URNG& urng);
 
   friend bool operator==(const UniformIntDistribution& lhs, const UniformIntDistribution& rhs) {
-    return lhs.a_ == rhs.a_ && lhs.b_ == rhs.b_;
+    return lhs.a() == rhs.a() && lhs.b() == rhs.b();
   }
 
-  // TODO operator<</>>
+  friend std::ostream& operator<<(std::ostream& os, const UniformIntDistribution& dist) {
+    const auto flags = os.flags(std::ios_base::scientific | std::ios_base::left);
+    const auto space = os.widen(' ');
+    const auto fill = os.fill(space);
+
+    os << dist.a() << space << dist.b();
+
+    os.flags(flags);
+    os.fill(fill);
+    return os;
+  }
+
+  friend std::istream& operator>>(std::istream& is, UniformIntDistribution& dist) {
+    const auto flags = is.flags(std::ios_base::dec | std::ios_base::skipws);
+
+    is >> dist.a_ >> dist.b_;
+
+    is.flags(flags);
+    return is;
+  }
  private:
-  const result_type a_, b_;
+  result_type a_, b_;
 };
 
 template <typename IntType>
@@ -147,12 +169,33 @@ class UniformRealDistribution {
   }
 
   friend bool operator==(const UniformRealDistribution& lhs, const UniformRealDistribution& rhs) {
-    return lhs.a_ == rhs.a_ && lhs.b_ == rhs.b_;
+    return lhs.a() == rhs.a() && lhs.b() == rhs.b();
   }
 
-  // TODO operator<</>>
+  friend std::ostream& operator<<(std::ostream& os, const UniformRealDistribution& dist) {
+    const auto flags = os.flags(std::ios_base::scientific | std::ios_base::left);
+    const auto space = os.widen(' ');
+    const auto fill = os.fill(space);
+    const auto precision = os.precision(std::numeric_limits<result_type>::max_digits10);
+
+    os << dist.a() << space << dist.b();
+
+    os.flags(flags);
+    os.fill(fill);
+    os.precision(precision);
+    return os;
+  }
+
+  friend std::istream& operator>>(std::istream& is, UniformRealDistribution& dist) {
+    const auto flags = is.flags(std::ios_base::dec | std::ios_base::skipws);
+
+    is >> dist.a_ >> dist.b_;
+
+    is.flags(flags);
+    return is;
+  }
  private:
-  const result_type a_, b_;
+  result_type a_, b_;
 };
 
 template <typename Numeric = double>

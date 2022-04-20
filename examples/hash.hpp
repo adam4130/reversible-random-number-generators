@@ -86,7 +86,6 @@ std::ostream& operator<<(std::ostream& os, const ReversibleHash& rng) {
 
   os.flags(flags);
   os.fill(fill);
-
   return os;
 }
 

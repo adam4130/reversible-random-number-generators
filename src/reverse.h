@@ -111,15 +111,21 @@ class ReversibleRNG {
 
   friend bool operator==(const ReversibleRNG& lhs, const ReversibleRNG& rhs) {
     return lhs.engine_ == rhs.engine_ && lhs.distribution_ == rhs.distribution_
-        && lhs.position_ == rhs.position_;
+        && lhs.position() == rhs.position();
   }
 
   friend std::ostream& operator<<(std::ostream& os, const ReversibleRNG& rng) {
-    return os << rng.engine_;
+    const auto space = os.widen(' ');
+    const auto fill = os.fill(space);
+
+    os << rng.engine_ << space << rng.distribution_ << space << rng.position();
+
+    os.fill(fill);
+    return os;
   }
 
   friend std::istream& operator>>(std::istream& is, ReversibleRNG& rng) {
-    return is >> rng.engine_;
+    return is >> rng.engine_ >> rng.distribution_ >> rng.position_;
   }
  private:
   template <std::size_t... Is, typename T>

@@ -54,7 +54,6 @@ std::ostream& operator<<(std::ostream& os, const ReversibleMersenne& rng) {
 
   os.flags(flags);
   os.fill(fill);
-
   return os;
 }
 

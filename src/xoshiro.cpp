@@ -92,7 +92,6 @@ std::ostream& operator<<(std::ostream& os, const Xoshiro256& rng) {
 
   os.flags(flags);
   os.fill(fill);
-
   return os;
 }
 

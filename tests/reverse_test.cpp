@@ -40,10 +40,9 @@ TEMPLATE_LIST_TEST_CASE("Reversible engine can reversed",
 
 TEMPLATE_LIST_TEST_CASE("Reversible engine can be discarded",
     "[reverse]", EngineTypes) {
-  TestType g1;
+  TestType g1, g2;
   g1.discard(N);
 
-  TestType g2;
   for (std::size_t n = 0; n < N; ++n) {
     g2();
   }
@@ -55,6 +54,7 @@ TEMPLATE_LIST_TEST_CASE("Reversible engine can be discarded",
 TEMPLATE_LIST_TEST_CASE("Reversible engine can be seeded",
     "[reverse]", EngineTypes) {
   TestType g1, g2;
+  g1.discard(N); // Arbitrarily advance the state
 
   const auto sd = std::random_device{}();
   g1.seed(sd);
@@ -66,13 +66,11 @@ TEMPLATE_LIST_TEST_CASE("Reversible engine can be seeded",
 
 TEMPLATE_LIST_TEST_CASE("Reversible engine can be streamed",
     "[reverse]", EngineTypes) {
-  TestType g1;
-  g1();
+  TestType g1, g2;
+  g1.discard(N); // Arbitrarily advance the state
 
   std::stringstream ss;
   ss << g1;
-
-  TestType g2;
   ss >> g2;
 
   REQUIRE(g1 == g2);
@@ -101,13 +99,26 @@ TEMPLATE_LIST_TEST_CASE("Reversible RNG can be reversed with tuples",
   REQUIRE(rng.position() == 0);
 }
 
-TEMPLATE_LIST_TEST_CASE("Reversible RNG can be compared",
+TEMPLATE_LIST_TEST_CASE("Reversible RNG can be seeded",
     "[reverse]", GeneratorTypes) {
   TestType rng1, rng2;
+  rng1.discard(N); // Arbitrarily advance the state
 
   const auto sd = std::random_device{}();
   rng1.seed(sd);
   rng2.seed(sd);
+
+  REQUIRE(rng1 == rng2);
+}
+
+TEMPLATE_LIST_TEST_CASE("Reversible RNG can be streamed",
+    "[reverse]", GeneratorTypes) {
+  TestType rng1, rng2;
+  rng1.discard(N); // Arbitrarily advance the state
+
+  std::stringstream ss;
+  ss << rng1;
+  ss >> rng2;
 
   REQUIRE(rng1 == rng2);
 }
