@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <ios>
 #include <istream>
 #include <ostream>
 #include <random>
@@ -60,6 +61,9 @@ class ReversibleRNG {
     position_ = 0;
   }
 
+  result_type min() const { return distribution_.min(); }
+  result_type max() const { return distribution_.max(); }
+
   void discard(unsigned long long z) {
     for (; z != 0ULL; --z) {
       (*this)();
@@ -115,17 +119,24 @@ class ReversibleRNG {
   }
 
   friend std::ostream& operator<<(std::ostream& os, const ReversibleRNG& rng) {
+    const auto flags = os.flags(std::ios_base::dec | std::ios_base::fixed | std::ios_base::left);
     const auto space = os.widen(' ');
     const auto fill = os.fill(space);
 
     os << rng.engine_ << space << rng.distribution_ << space << rng.position();
 
+    os.flags(flags);
     os.fill(fill);
     return os;
   }
 
   friend std::istream& operator>>(std::istream& is, ReversibleRNG& rng) {
-    return is >> rng.engine_ >> rng.distribution_ >> rng.position_;
+    const auto flags = is.flags(std::ios_base::dec | std::ios_base::skipws);
+
+    is >> rng.engine_ >> rng.distribution_ >> rng.position_;
+
+    is.flags(flags);
+    return is;
   }
  private:
   template <std::size_t... Is, typename T>
