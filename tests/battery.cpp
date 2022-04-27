@@ -1,20 +1,22 @@
 #include "battery.h"
 
 #include <cmath>
+#include <limits>
 #include <random>
 
-#include <mersenne.h>
-#include <pcg.h>
 #include <reverse.h>
-#include <xoshiro.h>
 
 using namespace reverse;
 
 /// Wrapper class that outputs uniformly distributed random bits. Converts
-/// a normally distributed generator to uniform with the normal CDF.
+/// a normally distributed generator to uniform with the normal CDF. Conforms
+/// to the minimum named requirements for a UniformRandomBitGenerator.
 class NormalCDF : public NormalRNG<> {
  public:
   using result_type = std::uint32_t;
+
+  static constexpr result_type min() { return std::numeric_limits<result_type>::lowest(); }
+  static constexpr result_type max() { return std::numeric_limits<result_type>::max(); }
 
   result_type operator()() {
     const auto normal = NormalRNG<>::operator()();
@@ -26,13 +28,6 @@ int main() {
   auto sd = std::random_device{}();
   std::cout << "Seed: " << sd << std::endl;
 
-  Battery<UniformRNG<std::uint32_t>>("Default", sd).BigCrush();
-  // Battery<NormalCDF>("Normal CDF", sd).BigCrush();
-
-  // Battery<pcg64>("pcg64", sd).BigCrush();
-  // Battery<std::mt19937_64>("mt19937_64", sd).BigCrush();
-  // Battery<Xoshiro256>("xoshiro256+", sd).BigCrush();
-
-  // Battery<ReversiblePCG<>>("Reversible PCG", sd).BigCrush();
-  // Battery<ReversibleMersenne>("Reversbile Mersenne Twister", sd).BigCrush();
+  Battery<UniformRNG<std::uint32_t>>("UniformRNG", sd).BigCrush();
+  // Battery<NormalCDF>("NormalCDF", sd).BigCrush();
 }
