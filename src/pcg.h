@@ -13,7 +13,11 @@ namespace reverse {
 
 template <typename itype, typename multiplier> struct Inverse {};
 
-// Precomputed multiplicative inverses of the PCG multiplier constants.
+// Precomputed multiplicative inverses of the PCG multiplier constants
+MULTIPLIER_CONSTANT(std::uint8_t, pcg_detail::default_multiplier, 69U)
+MULTIPLIER_CONSTANT(std::uint16_t, pcg_detail::default_multiplier, 8245U)
+MULTIPLIER_CONSTANT(std::uint32_t, pcg_detail::default_multiplier,
+    3425435293U)
 MULTIPLIER_CONSTANT(std::uint64_t, pcg_detail::default_multiplier,
     13877824140714322085ULL)
 MULTIPLIER_CONSTANT(pcg_extras::pcg128_t, pcg_detail::default_multiplier,
@@ -34,8 +38,10 @@ class ReversiblePCG : public EngineType {
   // Inherit constructors
   using EngineType::EngineType;
 
+  // Equivalent to `(*this)()`
   result_type next() { return EngineType::operator()(); }
 
+  // Inverse of `next`
   result_type previous() {
     if constexpr (ExtractPCG<EngineType>::output_previous) {
       return EngineType::output(base_ungenerate0());
@@ -47,7 +53,7 @@ class ReversiblePCG : public EngineType {
   using typename EngineType::state_type;
 
   // Inverse of the PCG `engine::bump` state transition function (LCG)
-  state_type unbump(state_type state) {
+  state_type unbump(state_type state) const {
     constexpr state_type inverse = ExtractPCG<EngineType>::multiplier_inverse;
     return (state - EngineType::increment()) * inverse;
   }
@@ -67,9 +73,10 @@ class ReversiblePCG : public EngineType {
   template <typename T>
   struct ExtractPCG;
 
-  /// The design of PCG forces us to do these ugly extractions to access its
+  /// The design of PCG forces us to do these extractions to access its `engine`
   /// template parameters. Gives access to the template parameter that determines
-  /// which LCG state value is given to the output permutation.
+  /// which LCG state value is updated before the output permutation and the
+  /// precomputed multiplier inverses.
   template <typename xtype, typename itype, typename output,
             bool previous, typename stream, typename multiplier>
   struct ExtractPCG<pcg_detail::engine<xtype, itype, output, previous, stream, multiplier>> {
