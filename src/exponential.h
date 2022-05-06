@@ -19,7 +19,7 @@ class ExponentialDistribution {
  public:
   using result_type = RealType;
 
-  ExponentialDistribution() : ExponentialDistribution(0.0) {}
+  ExponentialDistribution() : ExponentialDistribution(1.0) {}
 
   explicit ExponentialDistribution(result_type lambda) : lambda_(lambda) {
     assert(lambda_ > result_type(0.0));
