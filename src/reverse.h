@@ -10,8 +10,9 @@
 #include <utility>
 #include <vector>
 
-#include "pcg.h"
+#include "exponential.h"
 #include "normal.h"
+#include "pcg.h"
 #include "uniform.h"
 
 #include "pcg_extras.hpp"
@@ -159,6 +160,6 @@ template <typename RealType = double>
 using NormalRNG = ReversibleRNG<NormalDistribution<RealType>>;
 
 template <typename RealType = double>
-using ExponentialRNG = ReversibleRNG<std::exponential_distribution<RealType>>;
+using ExponentialRNG = ReversibleRNG<ExponentialDistribution<RealType>>;
 
 } // namespace reverse

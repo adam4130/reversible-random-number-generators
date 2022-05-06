@@ -28,6 +28,7 @@ class NormalDistribution  {
     assert(stddev_ > result_type(0.0));
   }
 
+  // Resets the distribution state
   void reset() {}
 
   // Returns the mean of the distribution

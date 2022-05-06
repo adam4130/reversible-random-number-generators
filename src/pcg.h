@@ -73,9 +73,8 @@ class ReversiblePCG : public EngineType {
   template <typename T>
   struct ExtractPCG;
 
-  /// The design of PCG forces us to do these extractions to access its `engine`
-  /// template parameters. Gives access to the template parameter that determines
-  /// which LCG state value is updated before the output permutation and the
+  /// Gives access to the the `engine` template parameter that determines if
+  /// the LCG state value is updated before the output permutation, and the
   /// precomputed multiplier inverses.
   template <typename xtype, typename itype, typename output,
             bool previous, typename stream, typename multiplier>
