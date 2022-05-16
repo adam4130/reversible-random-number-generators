@@ -165,26 +165,29 @@ double NormalDistribution<RealType>::ziggurat(URNG& urng) {
   static_assert(util::range<URNG>() == std::numeric_limits<std::uint64_t>::max(),
       "URNG must output 64-bits");
   while (true) {
-    const std::uint64_t u = urng();
-    const std::int32_t hz = std::uint32_t(u >> 32); // Higher bits
-    const std::uint8_t iz = hz & 0x7f;
-    if (std::abs(hz) < KN[iz]) {
-      return hz * WN[iz];
+    const std::uint64_t rand = urng();
+    const std::uint8_t index = rand & 0x7f; // 127 rectangles
+    const std::int32_t r = rand >> 8;
+
+    const double x = r * WN[index];
+    if (std::abs(r) < KN[index]) { // 98.78% of the time
+      return x;
     }
 
-    double x, y;
-    if (iz == 0) {
-      Xoshiro256 rng(u); // Fast generator that can be fully seeded with 64-bits
+    // Fast PRNG that can be seeded with 64 bits
+    Xoshiro256 rng(rand);
+
+    if (index == 0) {
+      double xx, yy;
       do {
-        x = -std::log(util::canonical(rng)) / R;
-        y = -std::log(util::canonical(rng));
-      } while (y + y < x * x);
-      return 0 < hz ? R + x : -R - x;
+        // log1p(-x) = log(1-x) avoids log(0)
+        xx = -std::log1p(-util::canonical(rng)) / R;
+        yy = -std::log1p(-util::canonical(rng));
+      } while (yy + yy < xx * xx);
+      return 0 < r ? R + xx : -(R + xx);
     }
 
-    x = hz * WN[iz];
-    y = util::float32(u); // Lower bits
-    if (FN[iz] + y * (FN[iz-1] - FN[iz]) < std::exp(-0.5 * x * x)) {
+    if (FN[index] + util::canonical(rng) * (FN[index-1] - FN[index]) < std::exp(-0.5 * x * x)) {
       return x;
     }
   }
