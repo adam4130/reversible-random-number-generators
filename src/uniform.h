@@ -23,12 +23,12 @@ inline constexpr typename URNG::result_type range() {
   return max - min;
 }
 
-// Lamire's nearly divisionless algorithm, https://arxiv.org/abs/1805.10941.
+// Lemire's nearly divisionless algorithm, https://arxiv.org/abs/1805.10941.
 // Downscales the output of a 64-bit random source to [0, range) without bias.
 template <typename URNG>
-inline std::uint64_t lamires(URNG& urng, std::uint64_t range) {
+inline std::uint64_t lemires(URNG& urng, std::uint64_t range) {
   static_assert(util::range<URNG>() == std::numeric_limits<std::uint64_t>::max(),
-      "URNG must output 64-bits");
+      "URNG must output 64 bits");
   using uint128_t = pcg_extras::pcg128_t;
 
   uint128_t product = uint128_t(urng()) * uint128_t(range);
@@ -45,7 +45,7 @@ inline std::uint64_t lamires(URNG& urng, std::uint64_t range) {
 }
 
 // Uniformly maps a 64-bit integer to the unit interval with its high bits. The
-// mantiassa of a double has 52 bits. Thus, an integer in [0, 2^53) can be
+// mantissa of a double has 52 bits. Thus, an integer in [0, 2^53) can be
 // divided by 2^53 to produce a double precision floating point value in [0, 1)
 // without bias. This method is ideal for random number generators with weak low
 // bits such as xoshiro256+.
@@ -63,7 +63,7 @@ inline float float32(std::uint32_t x) {
 template <typename URNG>
 inline double canonical(URNG& urng) {
   static_assert(range<URNG>() == std::numeric_limits<std::uint64_t>::max(),
-      "URNG must output 64-bits");
+      "URNG must output 64 bits");
   return float64(urng());
 }
 
@@ -136,7 +136,7 @@ typename UniformIntDistribution<IntType>::result_type
   }
 
   if (urng_range > dist_range) {
-    return uc_type(util::lamires(urng, dist_range + 1)) + a();
+    return uc_type(util::lemires(urng, dist_range + 1)) + a();
   }
 
   // TODO implement reversible algorithm for urng_range < dist_range

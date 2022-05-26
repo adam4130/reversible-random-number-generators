@@ -163,7 +163,7 @@ template <typename RealType>
   template <typename URNG>
 double NormalDistribution<RealType>::ziggurat(URNG& urng) {
   static_assert(util::range<URNG>() == std::numeric_limits<std::uint64_t>::max(),
-      "URNG must output 64-bits");
+      "URNG must output 64 bits");
   while (true) {
     const std::uint64_t rand = urng();
     const std::uint8_t index = rand & 0x7f; // 127 rectangles
