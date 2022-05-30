@@ -138,10 +138,6 @@ inline double float64(std::uint64_t x) {
   return (x >> 11) * 0x1.0p-53;
 }
 
-inline float float32(std::uint32_t x) {
-  return (x >> 8) * 0x1.0p-24;
-}
-
 // Converts the output of a 64-bit random source to a double precision floating
 // point value in [0, 1). Guaranteed to only make a single call to the function
 // call operator of the given generator.
@@ -357,11 +353,7 @@ class Xoshiro256 {
     return (x << k) | (x >> (64 - k));
   }
 
-  using state_type = std::array<result_type, 4>;
-  static constexpr state_type JUMP = { 0x180ec6d33cfd0aba, 0xd5a61266f0c9392c, 0xa9582618e03fc9aa, 0x39abdc4529b1661c };
-  static constexpr state_type LONG_JUMP = { 0x76e15d3efefdcbbf, 0xc5004e441c522fb3, 0x77710069854ee241, 0x39109bb02acbe635 };
-
-  state_type state_;
+  std::array<result_type, 4> state_;
 };
 
 void Xoshiro256::seed(result_type sd) {
