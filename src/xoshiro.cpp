@@ -16,7 +16,7 @@ void Xoshiro256::discard(unsigned long long z) {
   }
 }
 
-static inline std::uint64_t rotl(uint64_t x, int k) {
+static std::uint64_t rotl(std::uint64_t x, int k) {
   return (x << k) | (x >> (64 - k));
 }
 

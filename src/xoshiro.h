@@ -13,7 +13,7 @@ namespace reverse {
 /// See http://dx.doi.org/10.1145/2714064.2660195 and
 /// http://docs.oracle.com/javase/8/docs/api/java/util/SplittableRandom.html.
 /// It is a very fast generator passing BigCrush, and it can be useful if for
-/// some reason you absolutely want 64 bits of state.
+/// some reason you absolutely want 64 bits of state such as seeding Xoshiro.
 class Splitmix64 {
  public:
   using result_type = std::uint64_t;

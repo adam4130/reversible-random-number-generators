@@ -1,19 +1,19 @@
 # Reversible Random Number Generators
 
 A reversible random number generator library. Allows for reversing sequences of
-pseudorandom values on uniform, normal, and exponential probability
-distributions. The default underlying engine is the 
-[PCG](https://www.pcg-random.org/index.html) family of random number
-generators. The PCG generators use an LCG to update their internal state.
-This makes them an ideal candidate for building a reversible generator.
-Futhermore, they are statistically strong (passing TestU01 BigCrush) and very fast.
-We also provide two alternative reversible PRNG engines, the Mersenne Twister and
-a hashing engine with SHA256. However, the Mersenne Twister has failures within
-BigCrush, and the hash generator is about 100 times slower than PCG.
+pseudo-random values on uniform, normal, and exponential probability
+distributions. The default underlying engine is the
+[PCG](https://www.pcg-random.org/index.html) family of random number generators.
+The PCG generators use an LCG to update their internal state. This makes them an
+ideal candidate for building a reversible generator. Futhermore, they are
+statistically strong (passing TestU01 BigCrush) and very fast. We also provide
+two alternative reversible PRNG engines, the Mersenne Twister and a hashing
+engine with SHA256. However, the Mersenne Twister has failures within BigCrush,
+and the hash generator is about 100 times slower than PCG.
 
 ## Build
 
-Conforms to the typical CMake build and test procedure.
+Conforms to the modern CMake build and test procedure.
 
 ```
 $ mkdir build
@@ -35,21 +35,29 @@ add_executable(main main.cpp)
 target_link_libraries(main Reverse)
 ```
 
+The CMake build automatically pulls in the PCG library as well as the Catch2
+testing framework (and optionally TestU01). It also constructs the Python
+wrapper C shared library. However, we also provide an alternative header only
+library (`reverse.hpp`) that can be used in conjunction with the PCG headers.
+It only contains the base reversal functionality and leaves out other features
+such as the optional reversible bit generators, TestU01 wrapper, etc.
+
 ### Usage C++
 
 We currently support 3 types of probability distributions with: `UniformRNG`,
 `NormalRNG`, and `ExponentialRNG`. Each of these types has a single template
 parameter that determines their output type. For the normal and exponential
 generators, this template parameter must be a floating point type e.g.
-`double`. The constructor determines the underlying distribution parameters e.g.
-`UniformRNG<int> rng(-10, 10);` outputs integer values in [-10, 10]. The generator
-is automatically randomly seeded from a non-deterministic source such as `/dev/random`.
-There also exists a `seed` function that can be used to set a custom seed, or sequence,
-for repeatable values e.g. `rng.seed(123456789);`.
+`double`. The constructor determines the underlying distribution parameters
+e.g. `UniformRNG<int> rng(-10, 10);` outputs integer values in [-10, 10]. The
+generators are automatically seeded with a sequence from `std::random_device`
+which is implementation dependent if it provides non-deterministic random
+numbers. There also exist `seed` functions that can be used to set a custom
+seed or sequence, for repeatable values e.g. `rng.seed(123456789);`.
 
-Minimal example for generating and reversing a sequence of uniformly random values.
-Values can be generated individually, as vectors, or as tuples with variations of
-the `next/previous` functions.
+Minimal example for generating and reversing a sequence of uniformly random
+numbers. Values can be generated individually, as vectors, or as tuples with
+variations of the `next/previous` functions.
 
 ```
 #include <vector>
@@ -78,13 +86,16 @@ int main() {
 ### Usage Python
 
 Python ctypes allows for the import of a C shared library. Since our reversible
-generator is written in C++, we added a C interface (`libWrapper.so/dll`). We
-also provide a Python wrapper for this C interface (`examples/reverse.py`).
-Copy or link this module to the directory of your Python project. The reversible
-generators can then simply be accessed with `import reverse`.
-**Note:** The `reverse.py` module attempts to automatically find the C wrapper library
-(`libWrapper.so/dll`) on your path. However, the ctypes `find_library` function
-is very fragile. On UNIX systems, the lookup can be aided by with the following.
+generator is written in C++, we added a C interface (`libWrapper.so/dll`). To
+use the functions contained in this shared library we include a Python wrapper for
+this C wrapper (`examples/reverse.py`). Copy or link this module to the directory
+of your Python project. The reversible generators can then simply be accessed with
+`import reverse`.
+
+**Note:** The `reverse.py` module attempts to automatically find the C wrapper
+library (`libWrapper.so/dll`) on your path. However, the ctypes `find_library`
+function is very fragile. On UNIX systems, the lookup can be aided by with the
+following.
 
 ```
 $ export LD_LIBRARY_PATH="/usr/local/lib64" # Replace with the path containing libWrapper.so
@@ -97,6 +108,7 @@ Values can be generated individually or as NumPy arrays with variations of the
 ```
 import numpy as np
 
+# import reverse
 from reverse import UniformRealRNG
 
 # Random number generator on [0.0, 1.0)
