@@ -39,9 +39,7 @@ class ExponentialDistribution {
 
   template <typename URNG>
   result_type operator()(URNG& urng) {
-    static_assert(util::range<URNG>() == std::numeric_limits<std::uint64_t>::max(),
-        "URNG must output 64 bits");
-	  return -std::log(result_type(1) - util::float64(urng())) / lambda();
+    return -std::log1p(-util::canonical(urng)) / lambda();
   }
 
   friend bool operator==(const ExponentialDistribution& lhs, const ExponentialDistribution& rhs) {

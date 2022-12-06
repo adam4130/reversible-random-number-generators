@@ -5,7 +5,7 @@ pseudo-random values on uniform, normal, and exponential probability
 distributions. The default underlying engine is the
 [PCG](https://www.pcg-random.org/index.html) family of random number generators.
 The PCG generators use an LCG to update their internal state. This makes them an
-ideal candidate for building a reversible generator. Futhermore, they are
+ideal candidate for building a reversible generator. Furthermore, they are
 statistically strong (passing TestU01 BigCrush) and very fast. We also provide
 two alternative reversible PRNG engines, the Mersenne Twister and a hashing
 engine with SHA256. However, the Mersenne Twister has failures within BigCrush,
@@ -50,10 +50,9 @@ parameter that determines their output type. For the normal and exponential
 generators, this template parameter must be a floating point type e.g.
 `double`. The constructor determines the underlying distribution parameters
 e.g. `UniformRNG<int> rng(-10, 10);` outputs integer values in [-10, 10]. The
-generators are automatically seeded with a sequence from `std::random_device`
-which is implementation dependent if it provides non-deterministic random
-numbers. There also exist `seed` functions that can be used to set a custom
-seed or sequence, for repeatable values e.g. `rng.seed(123456789);`.
+generators are automatically seeded with a sequence from `std::random_device`.
+There also exist `seed` functions that can be used to set a custom seed or
+sequence e.g. `rng.seed(123456789);`.
 
 Minimal example for generating and reversing a sequence of uniformly random
 numbers. Values can be generated individually, as vectors, or as tuples with
