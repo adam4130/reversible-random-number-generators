@@ -37,10 +37,7 @@ target_link_libraries(main Reverse)
 
 The CMake build automatically pulls in the PCG library as well as the Catch2
 testing framework (and optionally TestU01). It also constructs the Python
-wrapper C shared library. However, we also provide an alternative header only
-library (`reverse.hpp`) that can be used in conjunction with the PCG headers.
-It only contains the base reversal functionality and leaves out other features
-such as the optional reversible bit generators, TestU01 wrapper, etc.
+wrapper C shared library for ctypes.
 
 ### Usage C++
 
