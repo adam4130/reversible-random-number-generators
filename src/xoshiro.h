@@ -94,7 +94,6 @@ class Xoshiro256 {
 template<typename Sseq>
 auto Xoshiro256::seed(Sseq& q)
     -> typename std::enable_if<!std::is_convertible<Sseq, result_type>::value>::type {
-  // TODO seed state directly ??
   std::array<std::uint32_t, 2> arr;
   q.generate(arr.begin(), arr.end());
   seed(std::uint64_t(arr[1]) << 32 | arr[0]);

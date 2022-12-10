@@ -9,6 +9,8 @@
 #include <stdexcept>
 #include <type_traits>
 
+#include "xoshiro.h"
+
 #include "pcg_extras.hpp"
 
 namespace reverse {
@@ -129,18 +131,29 @@ typename UniformIntDistribution<IntType>::result_type
   using uc_type = typename std::common_type<typename URNG::result_type, u_type>::type;
 
   constexpr uc_type urng_range = util::range<URNG>();
-  const uc_type dist_range = uc_type(b()) - uc_type(a());
+  static_assert(urng_range == std::numeric_limits<std::uint32_t>::max() ||
+                urng_range == std::numeric_limits<std::uint64_t>::max(),
+                "URNG must output 32 or 64 bits");
 
+  const uc_type dist_range = uc_type(b()) - uc_type(a());
   if (urng_range == dist_range) {
     return uc_type(urng() - urng.min()) + a();
   }
 
-  if (urng_range > dist_range) {
-    return uc_type(util::lemires(urng, dist_range + 1)) + a();
+  if constexpr (urng_range == std::numeric_limits<std::uint64_t>::max()) {
+    if (urng_range > dist_range) {
+      return uc_type(util::lemires(urng, dist_range + 1)) + a();
+    }
+  } else if constexpr (urng_range == std::numeric_limits<std::uint32_t>::max()) {
+    const std::uint32_t u1 = urng();
+    const std::uint32_t u2 = urng();
+    const std::uint32_t u3 = urng();
+    // u1 ^ u3 is uniformly distributed random since XOR is a bijection on [0, 2^32).
+    Xoshiro256 rng(std::uint64_t(u1 ^ u3) << 32 | u2);
+    return operator()(rng);
   }
 
-  // TODO implement reversible algorithm for urng_range < dist_range
-  throw std::runtime_error("Distribution range must be less or equal to URNG range");
+  throw std::runtime_error("Distribution range must be less or equal to 64 bits");
 }
 
 template <typename RealType = double>

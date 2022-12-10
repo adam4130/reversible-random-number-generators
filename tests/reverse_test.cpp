@@ -26,8 +26,8 @@ using GeneratorTypes = std::tuple<
 
 constexpr inline std::size_t N = 1'000'000;
 
-TEMPLATE_LIST_TEST_CASE("Reversible engine can reversed",
-    "[reverse]", EngineTypes) {
+TEMPLATE_LIST_TEST_CASE("Reversible engine can reversed", "[reverse]",
+    EngineTypes) {
   TestType g;
 
   std::vector<typename TestType::result_type> values(N);
@@ -38,8 +38,8 @@ TEMPLATE_LIST_TEST_CASE("Reversible engine can reversed",
   }
 }
 
-TEMPLATE_LIST_TEST_CASE("Reversible engine can be discarded",
-    "[reverse]", EngineTypes) {
+TEMPLATE_LIST_TEST_CASE("Reversible engine can be discarded", "[reverse]",
+    EngineTypes) {
   TestType g1, g2;
   g1.discard(N);
 
@@ -51,8 +51,8 @@ TEMPLATE_LIST_TEST_CASE("Reversible engine can be discarded",
   REQUIRE(g1() == g2());
 }
 
-TEMPLATE_LIST_TEST_CASE("Reversible engine can be seeded",
-    "[reverse]", EngineTypes) {
+TEMPLATE_LIST_TEST_CASE("Reversible engine can be seeded", "[reverse]",
+    EngineTypes) {
   TestType g1, g2;
   g1.discard(N); // Arbitrarily advance the state
 
@@ -64,8 +64,8 @@ TEMPLATE_LIST_TEST_CASE("Reversible engine can be seeded",
   REQUIRE(g1() == g2());
 }
 
-TEMPLATE_LIST_TEST_CASE("Reversible engine can be streamed",
-    "[reverse]", EngineTypes) {
+TEMPLATE_LIST_TEST_CASE("Reversible engine can be streamed", "[reverse]",
+    EngineTypes) {
   TestType g1, g2;
   g1.discard(N); // Arbitrarily advance the state
 
@@ -76,8 +76,8 @@ TEMPLATE_LIST_TEST_CASE("Reversible engine can be streamed",
   REQUIRE(g1 == g2);
 }
 
-TEMPLATE_LIST_TEST_CASE("Reversible RNG can be reversed with vectors",
-    "[reverse]", GeneratorTypes) {
+TEMPLATE_LIST_TEST_CASE("Reversible RNG can be reversed with vectors", "[reverse]",
+    GeneratorTypes) {
   TestType rng;
 
   auto values = rng.next(N);
@@ -87,8 +87,8 @@ TEMPLATE_LIST_TEST_CASE("Reversible RNG can be reversed with vectors",
   REQUIRE(rng.position() == 0);
 }
 
-TEMPLATE_LIST_TEST_CASE("Reversible RNG can be reversed with tuples",
-    "[reverse]", GeneratorTypes) {
+TEMPLATE_LIST_TEST_CASE("Reversible RNG can be reversed with tuples", "[reverse]",
+    GeneratorTypes) {
   TestType rng;
 
   const std::size_t n = 10; // Typical max tuple size
@@ -99,8 +99,8 @@ TEMPLATE_LIST_TEST_CASE("Reversible RNG can be reversed with tuples",
   REQUIRE(rng.position() == 0);
 }
 
-TEMPLATE_LIST_TEST_CASE("Reversible RNG can be seeded",
-    "[reverse]", GeneratorTypes) {
+TEMPLATE_LIST_TEST_CASE("Reversible RNG can be seeded", "[reverse]",
+    GeneratorTypes) {
   TestType rng1, rng2;
   rng1.discard(N); // Arbitrarily advance the state
 
@@ -111,8 +111,8 @@ TEMPLATE_LIST_TEST_CASE("Reversible RNG can be seeded",
   REQUIRE(rng1 == rng2);
 }
 
-TEMPLATE_LIST_TEST_CASE("Reversible RNG can be streamed",
-    "[reverse]", GeneratorTypes) {
+TEMPLATE_LIST_TEST_CASE("Reversible RNG can be streamed", "[reverse]",
+    GeneratorTypes) {
   TestType rng1, rng2;
   rng1.discard(N); // Arbitrarily advance the state
 
@@ -121,6 +121,17 @@ TEMPLATE_LIST_TEST_CASE("Reversible RNG can be streamed",
   ss >> rng2;
 
   REQUIRE(rng1 == rng2);
+}
+
+TEST_CASE("Reversible 32-bit RNG can be reversed with 64-bit output", "[reverse]") {
+  ReversibleRNG<UniformDistribution<std::uint64_t>, ReversiblePCG<pcg32>> rng;
+
+  std::vector<std::uint64_t> values(N);
+  std::generate(values.begin(), values.end(), [&rng] { return rng.next(); });
+
+  for (auto it = values.rbegin(); it != values.rend(); ++it) {
+    REQUIRE(*it == rng.previous());
+  }
 }
 
 } // namespace reverse

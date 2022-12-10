@@ -72,7 +72,6 @@ class ReversibleMersenne {
 template<typename Sseq>
 auto ReversibleMersenne::seed(Sseq& q)
     -> typename std::enable_if<!std::is_convertible<Sseq, result_type>::value>::type {
-  // TODO seed state directly ??
   std::array<std::uint32_t, 2> arr;
   q.generate(arr.begin(), arr.end());
   seed(std::uint64_t(arr[1]) << 32 | arr[0]);
