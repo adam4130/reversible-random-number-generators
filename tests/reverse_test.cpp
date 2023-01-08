@@ -76,6 +76,38 @@ TEMPLATE_LIST_TEST_CASE("Reversible engine can be streamed", "[reverse]",
   REQUIRE(g1 == g2);
 }
 
+TEMPLATE_LIST_TEST_CASE("Reversible engine can be reversed on int type", "[reverse]",
+    EngineTypes) {
+  const int a = -10;
+  const int b = 10;
+  ReversibleRNG<UniformDistribution<int>, TestType> rng(a, b);
+
+  std::vector<int> values(N);
+  std::generate(values.begin(), values.end(), [&rng] { return rng.next(); });
+
+  for (auto it = values.rbegin(); it != values.rend(); ++it) {
+    REQUIRE(*it >= a);
+    REQUIRE(*it <= b);
+    REQUIRE(*it == rng.previous());
+  }
+}
+
+TEMPLATE_LIST_TEST_CASE("Reversible engine can be reversed on double type", "[reverse]",
+    EngineTypes) {
+  const double a = -10.0;
+  const double b = 10.0;
+  ReversibleRNG<UniformDistribution<double>, TestType> rng(a, b);
+
+  std::vector<double> values(N);
+  std::generate(values.begin(), values.end(), [&rng] { return rng.next(); });
+
+  for (auto it = values.rbegin(); it != values.rend(); ++it) {
+    REQUIRE(*it >= a);
+    REQUIRE(*it < b);
+    REQUIRE(*it == rng.previous());
+  }
+}
+
 TEMPLATE_LIST_TEST_CASE("Reversible RNG can be reversed with vectors", "[reverse]",
     GeneratorTypes) {
   TestType rng;

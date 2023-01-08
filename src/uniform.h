@@ -131,29 +131,36 @@ typename UniformIntDistribution<IntType>::result_type
   using uc_type = typename std::common_type<typename URNG::result_type, u_type>::type;
 
   constexpr uc_type urng_range = util::range<URNG>();
-  static_assert(urng_range == std::numeric_limits<std::uint32_t>::max() ||
-                urng_range == std::numeric_limits<std::uint64_t>::max(),
-                "URNG must output 32 or 64 bits");
-
   const uc_type dist_range = uc_type(b()) - uc_type(a());
-  if (urng_range == dist_range) {
-    return uc_type(urng() - urng.min()) + a();
-  }
 
   if constexpr (urng_range == std::numeric_limits<std::uint64_t>::max()) {
     if (urng_range > dist_range) {
       return uc_type(util::lemires(urng, dist_range + 1)) + a();
     }
-  } else if constexpr (urng_range == std::numeric_limits<std::uint32_t>::max()) {
-    const std::uint32_t u1 = urng();
-    const std::uint32_t u2 = urng();
-    const std::uint32_t u3 = urng();
-    // u1 ^ u3 is uniformly distributed random since XOR is a bijection on [0, 2^32).
-    Xoshiro256 rng(std::uint64_t(u1 ^ u3) << 32 | u2);
-    return operator()(rng);
   }
 
-  throw std::runtime_error("Distribution range must be less or equal to 64 bits");
+  if (urng_range == dist_range) {
+    return uc_type(urng() - urng.min()) + a();
+  } else if (urng_range > dist_range) {
+    uc_type result;
+    const uc_type range = dist_range + 1;
+    const uc_type scaling = std::numeric_limits<uc_type>::max() / range;
+    const uc_type threshold = range * scaling;
+    do {
+      result = urng();
+    } while (result >= threshold);
+    return result / scaling + a();
+  } else { // urng_range < dist_range
+    if constexpr (urng_range == std::numeric_limits<std::uint32_t>::max()) {
+      const std::uint32_t u1 = urng();
+      const std::uint32_t u2 = urng();
+      const std::uint32_t u3 = urng();
+      // u1 ^ u3 is uniformly distributed random since XOR is a bijection on [0, 2^32).
+      Xoshiro256 rng(std::uint64_t(u1 ^ u3) << 32 | u2);
+      return operator()(rng);
+    }
+    throw std::runtime_error("Distribution range must be less or equal to 64 bits");
+  }
 }
 
 template <typename RealType = double>
@@ -177,9 +184,7 @@ class UniformRealDistribution {
   result_type max() const { return b(); }
 
   template <typename URNG>
-  result_type operator()(URNG& urng) {
-    return util::canonical(urng) * (b() - a()) + a();
-  }
+  result_type operator()(URNG& urng);
 
   friend bool operator==(const UniformRealDistribution& lhs, const UniformRealDistribution& rhs) {
     return lhs.a() == rhs.a() && lhs.b() == rhs.b();
@@ -210,6 +215,24 @@ class UniformRealDistribution {
  private:
   result_type a_, b_;
 };
+
+template <typename RealType>
+  template <typename URNG>
+typename UniformRealDistribution<RealType>::result_type
+    UniformRealDistribution<RealType>::operator()(URNG& urng) {
+  constexpr result_type urng_range = util::range<URNG>();
+  static_assert(urng_range == std::numeric_limits<std::uint32_t>::max() ||
+                urng_range == std::numeric_limits<std::uint64_t>::max(),
+                "URNG must output 32 or 64 bits");
+
+  result_type result;
+  if constexpr (urng_range == std::numeric_limits<std::uint64_t>::max()) {
+    result = util::canonical(urng);
+  } else {
+    result = util::float32(urng());
+  }
+  return result * (b() - a()) + a();
+}
 
 template <typename Numeric = double>
 using UniformDistribution = typename std::conditional<
