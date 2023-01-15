@@ -144,12 +144,11 @@ typename UniformIntDistribution<IntType>::result_type
   } else if (urng_range > dist_range) {
     uc_type result;
     const uc_type range = dist_range + 1;
-    const uc_type scaling = std::numeric_limits<uc_type>::max() / range;
-    const uc_type threshold = range * scaling;
+    const uc_type threshold = urng_range - (urng_range % range);
     do {
       result = urng();
     } while (result >= threshold);
-    return result / scaling + a();
+    return result % range + a();
   } else { // urng_range < dist_range
     if constexpr (urng_range == std::numeric_limits<std::uint32_t>::max()) {
       const std::uint32_t u1 = urng();
