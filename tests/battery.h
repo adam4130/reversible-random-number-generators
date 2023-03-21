@@ -5,6 +5,9 @@
 #include <limits>
 #include <random>
 #include <string>
+#include <typeinfo>
+
+#include <boost/core/demangle.hpp>
 
 extern "C" {
 #include <bbattery.h>
@@ -37,7 +40,8 @@ class Battery : Generator {
   static_assert(std::numeric_limits<typename URNG::result_type>::digits >= 32,
       "result_type must have at least 32 bits");
  public:
-  Battery(const std::string& name, std::uint64_t seed) : name_(name) {
+  Battery(std::uint64_t seed = 1u)
+      : name_(boost::core::demangle(typeid(URNG).name())) {
     urng_.seed(seed);
 
     gen_.state = this;

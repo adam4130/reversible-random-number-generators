@@ -25,9 +25,8 @@ class NormalCDF : public NormalRNG<> {
 };
 
 int main() {
-  auto sd = std::random_device{}();
-  std::cout << "Seed: " << sd << std::endl;
-
-  Battery<UniformRNG<std::uint32_t>>("UniformRNG", sd).BigCrush();
-  // Battery<NormalCDF>("NormalCDF", sd).BigCrush();
+  auto seed = std::random_device{}();
+  std::cout << "Seed: " << seed << std::endl;
+  Battery<UniformRNG<std::uint32_t>>(seed).BigCrush();
+  // Battery<NormalCDF>(seed).BigCrush();
 }

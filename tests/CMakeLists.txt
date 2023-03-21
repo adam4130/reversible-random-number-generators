@@ -19,6 +19,8 @@ catch_discover_tests(reverse_test)
 
 option(BUILD_TESTU01 "Build TestU01 statistical batteries" OFF)
 if(BUILD_TESTU01)
+  find_package(Boost REQUIRED)
+
   set(TESTU01 "testu01")
   set(TESTU01_EP "${TESTU01}_ep")
 
@@ -41,4 +43,5 @@ if(BUILD_TESTU01)
   add_executable(battery battery.cpp)
   add_dependencies(battery ${TESTU01_EP})
   target_link_libraries(battery PRIVATE ${TESTU01} Reverse)
+  target_include_directories(battery PRIVATE ${Boost_INCLUDE_DIR})
 endif()
