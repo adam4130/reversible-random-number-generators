@@ -84,7 +84,7 @@ int main() {
 Python ctypes allows for the import of a C shared library. Since our reversible
 generator is written in C++, we added a C interface (`libWrapper.so/dll`). To
 use the functions contained in this shared library we include a Python wrapper for
-this C wrapper (`examples/reverse.py`). Copy or link this module to the directory
+this C wrapper (`python/reverse.py`). Copy or link this module to the directory
 of your Python project. The reversible generators can then simply be accessed with
 `import reverse`.
 
@@ -94,7 +94,7 @@ function is very fragile. On UNIX systems, the lookup can be aided by with the
 following.
 
 ```
-$ export LD_LIBRARY_PATH="/usr/local/lib64" # Replace with the path containing libWrapper.so
+$ export LD_LIBRARY_PATH="<Path containing libWrapper.so e.g. /usr/local/lib64>"
 ```
 
 Minimal example for generating and reversing a sequence of uniformly random values.
