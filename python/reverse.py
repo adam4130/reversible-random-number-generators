@@ -15,10 +15,6 @@ class LoadWrapperLibrary(ctypes.CDLL):
             return self.name.lower()
 
     def __init__(self, path=None):
-        """
-        LD_LIBRARY_PATH may need to be set on Linux for find_library to succeed
-        e.g. $ export LD_LIBRARY_PATH="/usr/local/lib64"
-        """
         super().__init__(path or find_library("Wrapper"))
         for type in self.GeneratorTypes:
             self._initialize(type)
@@ -118,6 +114,9 @@ class UniformRealRNG:
     def max(self):
         return self.b()
 
+    def __str__(self):
+        return f"{self.__class__.__name__} on [{self.a()}, {self.b()})"
+
 
 class UniformIntRNG:
     def __init__(self, a=0, b=np.iinfo(np.intc).max):
@@ -175,6 +174,9 @@ class UniformIntRNG:
     def max(self):
         return self.b()
 
+    def __str__(self):
+        return f"{self.__class__.__name__} on [{self.a()}, {self.b()}]"
+
 
 class NormalRNG:
     def __init__(self, mean=0.0, stddev=1.0):
@@ -228,6 +230,12 @@ class NormalRNG:
     def max(self):
         return np.finfo(np.float64).max
 
+    def __str__(self):
+        return (
+            f"{self.__class__.__name__} with "
+            f"\u03BC = {self.mean()}, \u03C3 = {self.stddev()}"
+        )
+
 
 class ExponentialRNG:
     def __init__(self, lambd=1.0):
@@ -276,3 +284,6 @@ class ExponentialRNG:
 
     def max(self):
         return np.finfo(np.float64).max
+
+    def __str__(self):
+        return (f"{self.__class__.__name__} with \u03BB = {self.lambd()}")
