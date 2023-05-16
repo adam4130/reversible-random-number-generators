@@ -1,4 +1,5 @@
 numpy
 matplotlib
+prettytable
 pytest
 scipy

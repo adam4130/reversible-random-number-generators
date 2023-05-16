@@ -2,6 +2,7 @@ import ctypes
 from ctypes.util import find_library
 from enum import Enum
 import numpy as np
+import os
 
 
 class LoadWrapperLibrary(ctypes.CDLL):
@@ -15,6 +16,8 @@ class LoadWrapperLibrary(ctypes.CDLL):
             return self.name.lower()
 
     def __init__(self, path=None):
+        if path and (not os.path.exists(path) or not os.path.isfile(path)):
+            raise ValueError(f"Wrapper library does not exist at {path}.")
         super().__init__(path or find_library("Wrapper"))
         for type in self.GeneratorTypes:
             self._initialize(type)
@@ -63,14 +66,14 @@ class LoadWrapperLibrary(ctypes.CDLL):
 
 
 class UniformRealRNG:
-    def __init__(self, a=0.0, b=1.0):
+    def __init__(self, a=0.0, b=1.0, path=None):
         if a > b:
             raise ValueError(f"a = {a} must be less than or equal to b = {b}.")
 
         self._a = np.float64(a)
         self._b = np.float64(b)
 
-        self._lib = LoadWrapperLibrary()
+        self._lib = LoadWrapperLibrary(path)
         self._rng = self._lib.uniform_real_create(self._a, self._b)
 
     def __del__(self):
@@ -115,11 +118,11 @@ class UniformRealRNG:
         return self.b()
 
     def __str__(self):
-        return f"{self.__class__.__name__} on [{self.a()}, {self.b()})"
+        return f"{self.__class__.__name__}(a = {self.a()}, b = {self.b()})"
 
 
 class UniformIntRNG:
-    def __init__(self, a=0, b=np.iinfo(np.intc).max):
+    def __init__(self, a=0, b=np.iinfo(np.intc).max, path=None):
         if a > b:
             raise ValueError(f"a = {a} must be less than or equal to b = {b}.")
         if a < np.iinfo(np.intc).min or b > np.iinfo(np.intc).max:
@@ -130,7 +133,7 @@ class UniformIntRNG:
         self._a = np.intc(a)
         self._b = np.intc(b)
 
-        self._lib = LoadWrapperLibrary()
+        self._lib = LoadWrapperLibrary(path)
         self._rng = self._lib.uniform_int_create(self._a, self._b)
 
     def __del__(self):
@@ -175,19 +178,19 @@ class UniformIntRNG:
         return self.b()
 
     def __str__(self):
-        return f"{self.__class__.__name__} on [{self.a()}, {self.b()}]"
+        return f"{self.__class__.__name__}(a = {self.a()}, b = {self.b()})"
 
 
 class NormalRNG:
-    def __init__(self, mean=0.0, stddev=1.0):
-        if stddev <= 0:
-            raise ValueError(f"Stddev = {stddev} must be greater than 0.")
+    def __init__(self, mu=0.0, sigma=1.0, path=None):
+        if sigma <= 0:
+            raise ValueError(f"Sigma = {sigma} must be greater than 0.")
 
-        self._mean = np.float64(mean)
-        self._stddev = np.float64(stddev)
+        self._mu = np.float64(mu)
+        self._sigma = np.float64(sigma)
 
-        self._lib = LoadWrapperLibrary()
-        self._rng = self._lib.normal_create(self._mean, self._stddev)
+        self._lib = LoadWrapperLibrary(path)
+        self._rng = self._lib.normal_create(self._mu, self._sigma)
 
     def __del__(self):
         if hasattr(self, "_rng"):
@@ -218,11 +221,11 @@ class NormalRNG:
         self._lib.normal_previous_array(self._rng, arr, size)
         return arr
 
-    def mean(self):
-        return self._mean
+    def mu(self):
+        return self._mu
 
-    def stddev(self):
-        return self._stddev
+    def sigma(self):
+        return self._sigma
 
     def min(self):
         return np.finfo(np.float64).min
@@ -231,20 +234,18 @@ class NormalRNG:
         return np.finfo(np.float64).max
 
     def __str__(self):
-        return (
-            f"{self.__class__.__name__} with "
-            f"\u03BC = {self.mean()}, \u03C3 = {self.stddev()}"
-        )
+        return (f"{self.__class__.__name__}"
+                f"(mu = {self.mu()}, sigma = {self.sigma()})")
 
 
 class ExponentialRNG:
-    def __init__(self, lambd=1.0):
+    def __init__(self, lambd=1.0, path=None):
         if lambd <= 0:
-            raise ValueError(f"Lambda = {lambd} must be greater than 0.")
+            raise ValueError(f"Lambd = {lambd} must be greater than 0.")
 
         self._lambd = np.float64(lambd)
 
-        self._lib = LoadWrapperLibrary()
+        self._lib = LoadWrapperLibrary(path)
         self._rng = self._lib.exponential_create(self._lambd)
 
     def __del__(self):
@@ -286,4 +287,4 @@ class ExponentialRNG:
         return np.finfo(np.float64).max
 
     def __str__(self):
-        return (f"{self.__class__.__name__} with \u03BB = {self.lambd()}")
+        return (f"{self.__class__.__name__}(lambd = {self.lambd()})")

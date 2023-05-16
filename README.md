@@ -135,3 +135,29 @@ $ cmake .. -DBUILD_TESTU01=ON
 $ cmake --build . && ctest
 $ tests/battery > results.txt # Warning: BigCrush takes approximately 4 hours
 ```
+
+## Performance
+
+The following tables are the output of `python/benchmark.py`. They demonstrate
+that our reversible generators and Python wrapper are about 10 times faster than
+the NumPy `default_rng` implementation (which also happens to be PCG).
+
+
+```
++--------------------------------------+-----------+------------+
+|            Reversible RNG            |   next()  | previous() |
++--------------------------------------+-----------+------------+
+|   UniformRealRNG(a = 0.0, b = 1.0)   | 0.67 (μs) | 0.67 (μs)  |
+| UniformIntRNG(a = 0, b = 2147483647) | 0.72 (μs) | 0.72 (μs)  |
+|   NormalRNG(mu = 0.0, sigma = 1.0)   | 0.69 (μs) | 0.69 (μs)  |
+|     ExponentialRNG(lambd = 1.0)      | 0.75 (μs) | 0.74 (μs)  |
++--------------------------------------+-----------+------------+
+```
+
+```
++------------------+-----------+-----------+---------------+
+|    NumPy RNG     | uniform() |  normal() | exponential() |
++------------------+-----------+-----------+---------------+
+| Generator(PCG64) | 7.03 (μs) | 4.36 (μs) |   4.14 (μs)   |
++------------------+-----------+-----------+---------------+
+```
