@@ -112,6 +112,7 @@ class ReversibleRNG {
     return get(std::make_index_sequence<N>{}, previous(N));
   }
 
+  // Returns the position on the random number sequence
   inline std::int64_t position() const { return position_; }
 
   friend bool operator==(const ReversibleRNG& lhs, const ReversibleRNG& rhs) {

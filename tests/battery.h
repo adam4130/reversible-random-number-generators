@@ -36,11 +36,11 @@ void write_dispatch(void* state) {
 } // extern "C"
 
 template <typename URNG>
-class Battery : Generator {
+class TestU01Battery : Generator {
   static_assert(std::numeric_limits<typename URNG::result_type>::digits >= 32,
       "result_type must have at least 32 bits");
  public:
-  Battery(std::uint64_t seed = 1u)
+  TestU01Battery(std::uint64_t seed = 1u)
       : name_(boost::core::demangle(typeid(URNG).name())) {
     urng_.seed(seed);
 
@@ -65,6 +65,7 @@ class Battery : Generator {
   }
 
   std::uint32_t bits() override {
+    // return urng_() >> 32; // Test low bits of 64-bit generator
     return urng_();
   }
 

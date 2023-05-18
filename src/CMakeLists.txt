@@ -8,6 +8,9 @@ FetchContent_Declare(pcg-cpp
 FetchContent_MakeAvailable(pcg-cpp)
 set(PCG_INCLUDE_DIRS "${pcg-cpp_SOURCE_DIR}/include")
 
+# ----------------------------------------------------------------------
+# Reversible random number generator library
+
 add_library(Reverse STATIC exponential.cpp
                            mersenne.cpp
                            normal.cpp

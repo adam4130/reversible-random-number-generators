@@ -55,6 +55,8 @@ inline double float64(std::uint64_t x) {
   return (x >> 11) * 0x1.0p-53;
 }
 
+// Uniformly maps a 32-bit integer to the unit interval with its high bits.
+// Uses the logic as `float64()` (scaled to 32 bits) for the conversion.
 inline float float32(std::uint32_t x) {
   return (x >> 8) * 0x1.0p-24;
 }
@@ -95,7 +97,8 @@ class UniformIntDistribution {
   template <typename URNG>
   result_type operator()(URNG& urng);
 
-  friend bool operator==(const UniformIntDistribution& lhs, const UniformIntDistribution& rhs) {
+  friend bool operator==(const UniformIntDistribution& lhs,
+                         const UniformIntDistribution& rhs) {
     return lhs.a() == rhs.a() && lhs.b() == rhs.b();
   }
 
@@ -151,14 +154,17 @@ typename UniformIntDistribution<IntType>::result_type
     return result % range + a();
   } else { // urng_range < dist_range
     if constexpr (urng_range == std::numeric_limits<std::uint32_t>::max()) {
+      // Generate 3 32-bit values to reversibly seed a 64-bit generator
       const std::uint32_t u1 = urng();
       const std::uint32_t u2 = urng();
       const std::uint32_t u3 = urng();
-      // u1 ^ u3 is uniformly distributed random since XOR is a bijection on [0, 2^32).
-      Xoshiro256 rng(std::uint64_t(u1 ^ u3) << 32 | u2);
+
+      // u1 ^ u3 is uniformly distributed random since XOR is a bijection on [0, 2^32)
+      const std::uint64_t reversible_seed = std::uint64_t(u1 ^ u3) << 32 | u2;
+      Xoshiro256 rng(reversible_seed);
       return operator()(rng);
     }
-    throw std::runtime_error("Distribution range must be less or equal to 64 bits");
+    throw std::runtime_error("Distribution range must be less or equal to 64 bits.");
   }
 }
 
@@ -185,7 +191,8 @@ class UniformRealDistribution {
   template <typename URNG>
   result_type operator()(URNG& urng);
 
-  friend bool operator==(const UniformRealDistribution& lhs, const UniformRealDistribution& rhs) {
+  friend bool operator==(const UniformRealDistribution& lhs,
+                         const UniformRealDistribution& rhs) {
     return lhs.a() == rhs.a() && lhs.b() == rhs.b();
   }
 
@@ -226,9 +233,11 @@ typename UniformRealDistribution<RealType>::result_type
 
   result_type result;
   if constexpr (urng_range == std::numeric_limits<std::uint64_t>::max()) {
-    result = util::canonical(urng);
-  } else {
+    result = util::float64(urng());
+  } else if constexpr (urng_range == std::numeric_limits<std::uint32_t>::max()) {
     result = util::float32(urng());
+  } else {
+    throw std::runtime_error("Unreachable: URNG must output 32 or 64 bits.");
   }
   return result * (b() - a()) + a();
 }
