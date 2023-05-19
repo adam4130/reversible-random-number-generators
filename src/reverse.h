@@ -39,7 +39,7 @@ class ReversedEngine {
 };
 
 /// Main templated class for defining a reversible random number generator on a
-/// given probability distribution. The underlying reversbile generator is
+/// given probability distribution. The underlying reversible generator is
 /// randomly seeded with seed sequence.
 template <typename DistType = UniformDistribution<>,
           typename EngineType = ReversiblePCG<>>

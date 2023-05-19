@@ -1,6 +1,9 @@
-from numpy.random import default_rng
+#!/usr/bin/env python3
+
+from numpy.random import Generator, MT19937, PCG64, Philox, SFC64
 from prettytable import PrettyTable
 from statistics import mean
+import sys
 import timeit
 
 from reverse import (
@@ -16,29 +19,44 @@ def benchmark(stmt):
     return f"{mean(times):.2f} (\u03BCs)"
 
 
-def main():
-    # Reversible random number generators
-    reversible_table = PrettyTable()
-    reversible_table.field_names = ["Reversible RNG", "next()", "previous()"]
+def benchmark_reversible():
+    table = PrettyTable()
+    table.title = "Python Reversible Random Number Generators"
+    table.field_names = ["Reversible RNG", "next()", "previous()"]
     for rng in [UniformRealRNG(), UniformIntRNG(),
                 NormalRNG(), ExponentialRNG()]:
         next = benchmark(rng.next)
         previous = benchmark(rng.previous)
-        reversible_table.add_row([str(rng), next, previous])
-    print(reversible_table)
+        table.add_row([str(rng), next, previous])
+    print(table)
 
-    # NumPy default random number generator
-    numpy_rng = default_rng()
-    uniform = benchmark(numpy_rng.uniform)
-    normal = benchmark(numpy_rng.normal)
-    exponential = benchmark(numpy_rng.exponential)
 
-    numpy_table = PrettyTable()
-    numpy_table.field_names = [
-        "NumPy RNG", "uniform()", "normal()", "exponential()"
-    ]
-    numpy_table.add_row([str(numpy_rng), uniform, normal, exponential])
-    print(numpy_table)
+def benchmark_numpy():
+    table = PrettyTable()
+    table.title = "NumPy Random Number Generators"
+    table.field_names = ["NumPy RNG", "uniform()", "normal()", "exponential()"]
+    for type in [MT19937, PCG64, Philox, SFC64]:
+        rng = Generator(type())
+        uniform = benchmark(rng.uniform)
+        normal = benchmark(rng.normal)
+        exponential = benchmark(rng.exponential)
+        table.add_row([str(rng), uniform, normal, exponential])
+    print(table)
+
+
+def print_table():
+    table = PrettyTable()
+    table.title = "C++ Reversible Random Number Generators"
+    table.field_names = ["Reversible RNG", "next()", "previous()"]
+    for line in sys.stdin:
+        table.add_row([x.strip() for x in line.split(",")])
+    print(table)
+
+
+def main():
+    benchmark_reversible()
+    # benchmark_numpy()
+    # print_table()
 
 
 if __name__ == "__main__":

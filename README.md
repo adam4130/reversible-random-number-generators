@@ -138,26 +138,46 @@ $ tests/battery > results.txt # Warning: BigCrush takes approximately 4 hours
 
 ## Performance
 
-The following tables are the output of `python/benchmark.py`. They demonstrate
-that our reversible generators and Python wrapper are about 10 times faster than
-the NumPy `default_rng` implementation (which also happens to be PCG).
-
+The following tables are the output of `examples/benchmark.cpp` and
+`python/benchmark.py`.
 
 ```
++---------------------------------------------+
+|   C++ Reversible Random Number Generators   |
++-----------------+-------------+-------------+
+|  Reversible RNG |    next()   |  previous() |
++-----------------+-------------+-------------+
+|    UniformRNG   |  4.83  (ns) |  4.58  (ns) |
+|    NormalRNG    |  11.19 (ns) |  11.99 (ns) |
+|  ExponentialRNG |  5.68  (ns) |  6.50  (ns) |
++-----------------+-------------+-------------+
+```
+
+The Python wrapper of our reversible generators is about 10 times faster than
+the NumPy random bit generators.
+
+```
++---------------------------------------------------------------+
+|           Python Reversible Random Number Generators          |
 +--------------------------------------+-----------+------------+
 |            Reversible RNG            |   next()  | previous() |
 +--------------------------------------+-----------+------------+
-|   UniformRealRNG(a = 0.0, b = 1.0)   | 0.67 (μs) | 0.67 (μs)  |
-| UniformIntRNG(a = 0, b = 2147483647) | 0.72 (μs) | 0.72 (μs)  |
+|   UniformRealRNG(a = 0.0, b = 1.0)   | 0.68 (μs) | 0.69 (μs)  |
+| UniformIntRNG(a = 0, b = 2147483647) | 0.70 (μs) | 0.72 (μs)  |
 |   NormalRNG(mu = 0.0, sigma = 1.0)   | 0.69 (μs) | 0.69 (μs)  |
-|     ExponentialRNG(lambd = 1.0)      | 0.75 (μs) | 0.74 (μs)  |
+|     ExponentialRNG(lambd = 1.0)      | 0.73 (μs) | 0.73 (μs)  |
 +--------------------------------------+-----------+------------+
 ```
 
 ```
-+------------------+-----------+-----------+---------------+
-|    NumPy RNG     | uniform() |  normal() | exponential() |
-+------------------+-----------+-----------+---------------+
-| Generator(PCG64) | 7.03 (μs) | 4.36 (μs) |   4.14 (μs)   |
-+------------------+-----------+-----------+---------------+
++------------------------------------------------------------+
+|               NumPy Random Number Generators               |
++--------------------+-----------+-----------+---------------+
+|     NumPy RNG      | uniform() |  normal() | exponential() |
++--------------------+-----------+-----------+---------------+
+| Generator(MT19937) | 7.26 (μs) | 4.59 (μs) |   4.31 (μs)   |
+|  Generator(PCG64)  | 7.19 (μs) | 4.58 (μs) |   4.27 (μs)   |
+| Generator(Philox)  | 7.16 (μs) | 4.56 (μs) |   4.31 (μs)   |
+|  Generator(SFC64)  | 7.21 (μs) | 4.55 (μs) |   4.23 (μs)   |
++--------------------+-----------+-----------+---------------+
 ```

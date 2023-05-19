@@ -1,3 +1,7 @@
+/// WARNING: This class is provided for example purposes only. Default to
+/// ReversiblePCG in pcg.h which provides a faster and more rigorous
+/// implementation of a reversible uniform bit generator.
+
 #pragma once
 
 #include <array>

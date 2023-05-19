@@ -1,6 +1,6 @@
 /// WARNING: This class is provided for example purposes only. Default to
 /// NormalRNG<> in reverse.h which provides a faster and more rigorous
-/// implementation of revesible normally distributed random values with the
+/// implementation of reversible normally distributed random values with the
 /// Ziggurat method.
 
 #pragma once
@@ -10,23 +10,24 @@
 #include <type_traits>
 #include <utility>
 
-#include <reverse.h>
+#include "reverse.h"
 
 namespace reverse {
 
-/// Reversible random number generator on a normal distribution with mean of 0
-/// and standard deviation of 1. Uses the Marsaglia polar method to sample
-/// normal values from a uniform random source.
+/// Reversible random number generator on a normal distribution. Uses the
+/// Marsaglia polar method to sample normal values from a reversible uniform
+/// random source.
 template <typename RealType = double>
-class Polar {
+class ReversiblePolar {
   static_assert(std::is_floating_point<RealType>::value,
       "result_type must be a floating point type");
  public:
   using result_type = RealType;
 
-  Polar() : Polar(0.0) {}
+  ReversiblePolar() : ReversiblePolar(0.0) {}
 
-  explicit Polar(result_type mean, result_type stddev = result_type(1.0))
+  explicit ReversiblePolar(result_type mean,
+                           result_type stddev = result_type(1.0))
       : mean_(mean), stddev_(stddev), urng_(-1, 1) {
     assert(stddev_ > result_type(0.0));
   }
@@ -54,19 +55,18 @@ class Polar {
   template <typename URNG>
   static std::pair<result_type, result_type> polar(URNG& urng);
 
-  result_type saved_ = 0, next_saved_ = 0;
   bool reversing_ = false, saved_available_ = false;
-
-  UniformRNG<result_type> urng_;
+  result_type saved_ = 0.0, next_saved_ = 0.0;
 
   const result_type mean_, stddev_;
+  UniformRNG<result_type> urng_;
 };
 
 template <typename RealType>
   template <typename URNG>
-std::pair<typename Polar<RealType>::result_type,
-          typename Polar<RealType>::result_type>
-    Polar<RealType>::polar(URNG& urng) {
+std::pair<typename ReversiblePolar<RealType>::result_type,
+          typename ReversiblePolar<RealType>::result_type>
+    ReversiblePolar<RealType>::polar(URNG& urng) {
   result_type u, v, s;
   do {
     u = urng();
@@ -78,7 +78,8 @@ std::pair<typename Polar<RealType>::result_type,
 }
 
 template <typename RealType>
-typename Polar<RealType>::result_type Polar<RealType>::next() {
+typename ReversiblePolar<RealType>::result_type
+    ReversiblePolar<RealType>::next() {
   if (saved_available_) {
     saved_available_ = false;
     return next_saved_ * stddev() + mean();
@@ -97,7 +98,8 @@ typename Polar<RealType>::result_type Polar<RealType>::next() {
 }
 
 template <typename RealType>
-typename Polar<RealType>::result_type Polar<RealType>::previous() {
+typename ReversiblePolar<RealType>::result_type
+    ReversiblePolar<RealType>::previous() {
   if (!saved_available_) {
     saved_available_ = true;
     return next_saved_ * stddev() + mean();

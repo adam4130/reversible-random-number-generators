@@ -56,7 +56,7 @@ inline double float64(std::uint64_t x) {
 }
 
 // Uniformly maps a 32-bit integer to the unit interval with its high bits.
-// Uses the logic as `float64()` (scaled to 32 bits) for the conversion.
+// Uses the same logic as `float64()` (scaled to 32 bits) for the conversion.
 inline float float32(std::uint32_t x) {
   return (x >> 8) * 0x1.0p-24;
 }
