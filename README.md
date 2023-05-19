@@ -13,7 +13,7 @@ and the hash generator is about 100 times slower than PCG.
 
 ## Build
 
-Conforms to the modern CMake build and test procedure.
+Conforms to the typical CMake build and test procedure.
 
 ```
 $ mkdir build
@@ -34,10 +34,6 @@ find_package(Reverse REQUIRED)
 add_executable(main main.cpp)
 target_link_libraries(main Reverse)
 ```
-
-The CMake build automatically pulls in the PCG library as well as the Catch2
-testing framework (and optionally TestU01). It also constructs the Python
-wrapper C shared library for ctypes.
 
 ### Usage C++
 
@@ -82,29 +78,31 @@ int main() {
 ### Usage Python
 
 Python ctypes allows for the import of a C shared library. Since our reversible
-generator is written in C++, we added a C interface (`libWrapper.so/dll`). To
-use the functions contained in this shared library we include a Python wrapper for
-this C wrapper (`python/reverse.py`). Copy or link this module to the directory
-of your Python project. The reversible generators can then simply be accessed with
-`import reverse`.
+generator is written in C++, we have added a C interface (`libWrapper.so/dll`).
+To use the functions contained in this shared library, we include a Python
+wrapper for this C wrapper (`python/reverse.py`). Copy or link this module to
+the directory of your Python project. The reversible generators can then simply
+be accessed with `import reverse`.
 
 **Note:** The `reverse.py` module attempts to automatically find the C wrapper
-library (`libWrapper.so/dll`) on your path. However, the ctypes `find_library`
-function is very fragile. On UNIX systems, the lookup can be aided by with the
-following.
+library (`libWrapper.so/dll`) on your path with the ctypes `find_library`
+function. On UNIX systems, the lookup can be aided by with the following.
+Alternatively, the constructor of the generators also contains an optional
+`path` parameter to specify the complete path to the shared library.
 
 ```
 $ export LD_LIBRARY_PATH="<Path containing libWrapper.so e.g. /usr/local/lib64>"
+OR
+>>> rng = UniformRealRNG(path="<Path containing libWrapper.so>/libWrapper.so")
 ```
 
-Minimal example for generating and reversing a sequence of uniformly random values.
-Values can be generated individually or as NumPy arrays with variations of the
-`next/previous` functions.
+Minimal example for generating and reversing a sequence of uniformly random
+values. Values can be generated individually or as NumPy arrays with variations
+of the `next`/`previous` functions.
 
 ```
 import numpy as np
 
-# import reverse
 from reverse import UniformRealRNG
 
 # Random number generator on [0.0, 1.0)
@@ -120,20 +118,36 @@ backward = rng.previous(N)
 assert np.array_equal(forward, backward)
 ```
 
+## External Dependencies
+
+The default CMake build automatically downloads the PCG library as well as the
+Catch2 testing framework. If `BUILD_TESTU01` is enabled, the TestU01 library is
+downloaded and built from source (see below). This option requires the Boost
+C++ library. The CMake build also has an option, `BUILD_EXAMPLES`, which
+generates an executable to benchmark our reversible C++ generators. This option
+requires the OpenSSL library (for our reversible cryptographic hash generator).
+
+On Debian based systems, these optional dependencies can be downloaded with the
+following.
+
+```
+$ sudo apt install libboost-all-dev libssl-dev
+```
+
 ## TestU01 BigCrush
 
 The TestU01 BigCrush battery has become the standard for checking the statistical
-quality of a pseudorandom number generator. We provide a C++ wrapper to interface
-with the old C-style TestU01 external generators. Enable the `BUILD_TESTU01` CMake
-option to download and build the TestU01 library. It also creates an executable
-(`battery`) that randomly seeds our reversible `UniformRNG` and runs the BigCrush
-battery.
+quality of a pseudorandom number generator. We provide a templated C++ wrapper
+for the old C-style TestU01 external generator interface (`tests/battery.h`).
+Enabling the `BUILD_TESTU01` CMake option will download and build the TestU01
+library as well as an executable (`battery`) that randomly seeds our reversible
+`UniformRNG` and runs the BigCrush test suite.
 
 ```
 $ cd build
 $ cmake .. -DBUILD_TESTU01=ON
 $ cmake --build . && ctest
-$ tests/battery > results.txt # Warning: BigCrush takes approximately 4 hours
+$ tests/battery > output.txt # Warning: BigCrush takes approximately 4 hours
 ```
 
 ## Performance

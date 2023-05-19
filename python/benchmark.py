@@ -6,12 +6,7 @@ from statistics import mean
 import sys
 import timeit
 
-from reverse import (
-    UniformRealRNG,
-    UniformIntRNG,
-    NormalRNG,
-    ExponentialRNG,
-)
+from reverse import UniformRealRNG, UniformIntRNG, NormalRNG, ExponentialRNG
 
 
 def benchmark(stmt):
