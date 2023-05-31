@@ -16,7 +16,7 @@ class LoadWrapperLibrary(ctypes.CDLL):
             return self.name.lower()
 
     def __init__(self, path=None):
-        if path and (not os.path.exists(path) or not os.path.isfile(path)):
+        if path and not os.path.isfile(path):
             raise ValueError(f"Wrapper library does not exist at {path}.")
         super().__init__(path or find_library("Wrapper"))
         for type in self.GeneratorTypes:
