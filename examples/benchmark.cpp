@@ -94,8 +94,8 @@ static std::string TimesToCSV(
 template <typename F>
 static void BenchmarkImpl(F func, const std::string& name) {
   std::vector<double> sums = func();
-  for (auto& s: sums) { s = 0.0; } // Initialize 0's vector
-  for (std::size_t i = 0; i < REPEAT; ++i) {
+  // Start at i = 1 since func() already called to initialize the sums.
+  for (std::size_t i = 1; i < REPEAT; ++i) {
     std::vector<double> times = func();
     std::transform(sums.begin(), sums.end(), times.begin(), sums.begin(),
                    std::plus<double>());
